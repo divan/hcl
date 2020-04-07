@@ -1,8 +1,6 @@
 package hclwrite
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
@@ -23,7 +21,6 @@ func NewReplacer(name string, value Tokens) *Replacer {
 }
 
 func (r *Replacer) processToken(token Token, depth string) (Tokens, bool) {
-	fmt.Println(depth, "  > (", r.inside, ")", token.Type, string(token.Bytes))
 	if token.Type == hclsyntax.TokenIdent && !r.inside {
 		name := string(token.Bytes)
 		if name == r.Name {

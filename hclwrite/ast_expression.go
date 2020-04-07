@@ -282,8 +282,9 @@ func (ii *iterator) iterateNodes(ns *nodes) *nodes {
 
 func newValueTokens() Tokens {
 	tok := &Token{
-		Type:  hclsyntax.TokenQuotedLit,
-		Bytes: []byte("foo"),
+		Type:         hclsyntax.TokenQuotedLit,
+		Bytes:        []byte("foo"),
+		SpacesBefore: 1,
 	}
 	return Tokens{tok}
 }
