@@ -224,17 +224,14 @@ func newTraverseIndex() *TraverseIndex {
 	}
 }
 
-// FIXME: rename to proper function
-func (e *Expression) ReplaceInputFields(key string) {
-	ch := e.children
-
-	replace := NewReplacer(key, newValueTokens())
+func (e *Expression) ReplaceObjectField(key string, value *Expression) {
+	replace := NewReplacer(key, newValueTokens(value))
 	ii := iterator{
 		r:     replace,
 		depth: 0,
 		debug: false,
 	}
-	e.children = ii.iterateNodes(ch)
+	e.children = ii.iterateNodes(e.children)
 }
 
 type iterator struct {
@@ -280,11 +277,6 @@ func (ii *iterator) iterateNodes(ns *nodes) *nodes {
 	return newNodes
 }
 
-func newValueTokens() Tokens {
-	tok := &Token{
-		Type:         hclsyntax.TokenQuotedLit,
-		Bytes:        []byte("foo"),
-		SpacesBefore: 1,
-	}
-	return Tokens{tok}
+func newValueTokens(expr *Expression) Tokens {
+	return expr.BuildTokens(nil)
 }
