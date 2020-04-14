@@ -2,7 +2,6 @@ package hclwrite
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
@@ -222,61 +221,4 @@ func newTraverseIndex() *TraverseIndex {
 	return &TraverseIndex{
 		inTree: newInTree(),
 	}
-}
-
-func (e *Expression) ReplaceObjectField(key string, value *Expression) {
-	replace := NewReplacer(key, newValueTokens(value))
-	ii := iterator{
-		r:     replace,
-		depth: 0,
-		debug: false,
-	}
-	e.children = ii.iterateNodes(e.children)
-}
-
-type iterator struct {
-	r     *Replacer
-	depth int
-	debug bool
-}
-
-func (ii *iterator) iterateNodes(ns *nodes) *nodes {
-	ii.depth++
-	depth := strings.Repeat("  ", ii.depth)
-
-	newNodes := &nodes{}
-	for n := ns.first; n != nil; n = n.after {
-		if ii.debug {
-			fmt.Printf("%s > %T\n", depth, n.content)
-		}
-		if tokens, ok := n.content.(Tokens); ok {
-			if ii.debug {
-				fmt.Println(depth, ">> Iterating tokens (inside:", ii.r.inside, "):")
-			}
-			newTokens := Tokens{}
-			for _, token := range tokens {
-				if ii.debug {
-					fmt.Println(depth, "  > (", ii.r.inside, ")", token.Type, string(token.Bytes))
-				}
-				tt, skipped := ii.r.processToken(*token, depth)
-				if skipped {
-					continue
-				}
-				newTokens = append(newTokens, tt...)
-			}
-			n.content = newTokens
-			newNodes.AppendNode(n)
-		} else {
-			if !ii.r.inside {
-				newNodes.AppendNode(n)
-			}
-		}
-	}
-	ii.depth--
-
-	return newNodes
-}
-
-func newValueTokens(expr *Expression) Tokens {
-	return expr.BuildTokens(nil)
 }
